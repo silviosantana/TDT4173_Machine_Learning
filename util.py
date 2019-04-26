@@ -41,9 +41,33 @@ def flatten_image_list (image_list):
         
     return flatten_list
 
-X_train, Y_train = import_dataset()
-X_flatten = flatten_image_list (X_train)
-Y_hot = onehot_encode(Y_train)
+
+def shuffle_data(X, Y):
+    idx = np.arange(0, X.shape[0]);
+    np.random.shuffle(idx);
+
+    X, Y = X[idx], Y[idx];
+    
+    return X, Y;
+
+def train_val_split(X, Y, val_percentage):
+  """
+    Selects samples from the dataset randomly to be in the validation set. Also, shuffles the train set.
+    --
+    X: [N, num_features] numpy vector,
+    Y: [N, 1] numpy vector
+    val_percentage: amount of data to put in validation set
+  """
+  dataset_size = X.shape[0]
+  idx = np.arange(0, dataset_size)
+  np.random.shuffle(idx) 
+  
+  train_size = int(dataset_size*(1-val_percentage))
+  idx_train = idx[:train_size]
+  idx_val = idx[train_size:]
+  X_train, Y_train = X[idx_train], Y[idx_train]
+  X_val, Y_val = X[idx_val], Y[idx_val]
+  return X_train, Y_train, X_val, Y_val
     
 
 
