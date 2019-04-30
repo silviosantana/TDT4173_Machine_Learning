@@ -77,30 +77,64 @@ def play(imageBytes):
     #return imageBytes
 
 
-images, labels = util.import_dataset()
-imageBytes = np.array(util.flatten_image_list (images))
+def transform_data(samples):
+    n_samples = []
+    for i in range(0, len(samples)):
+        n_samples.append(np.array(samples[i]))
+    imageBytes = np.array(util.flatten_image_list (n_samples))
+    primarycomp = play(imageBytes)
+    
+    return primarycomp
 
-primarycomp = play(imageBytes)
-X_train, Y_train, X_test, Y_test = util.train_val_split(primarycomp, labels, 0.8)
+def get_data(): 
+    images, labels = util.import_dataset()
+    imageBytes = np.array(util.flatten_image_list (images))
+    
+    primarycomp = play(imageBytes)
+    X_train, Y_train, X_test, Y_test = util.train_val_split(primarycomp, labels, 0.8)
+    
+    return X_train, Y_train, X_test, Y_test
+
+def svm_train(X_train, Y_train):
+    svmC = svm.SVC(gamma='scale', probability=True)
+    svmC.fit(X_train, Y_train)
+    
+    return svmC
+
+def svm_predict(svmC, X_test):
+    svm_y_pred = svmC.predict(X_test)
+    #confidence = svmC.predict_log_proba(X_test)
+    confidence = svmC.predict_proba(X_test)  
+    return svm_y_pred, confidence
+    
 #X_train, Y_train = augmentation(X_train, Y_train)
 #X_train = play(X_train)
 #X_test = play(X_test)
 
-knn =  MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state=1)
-knn.fit(X_train, Y_train) 
-knn_y_pred = knn.predict(X_test)
-print("Accuracy is ", accuracy_score(Y_test,knn_y_pred)*100)
+#knn =  MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state=1)
+#knn.fit(X_train, Y_train) 
+#knn_y_pred = knn.predict(X_test)
+#print("Accuracy is ", accuracy_score(Y_test,knn_y_pred)*100)
 
-rf = RandomForestClassifier(n_estimators=300,  random_state=0)
-rf.fit(X_train, Y_train)
-rf_y_pred = rf.predict(X_test)
-print("Accuracy is ", accuracy_score(Y_test,rf_y_pred)*100)
+#rf = RandomForestClassifier(n_estimators=300,  random_state=0)
+#rf.fit(X_train, Y_train)
+#rf_y_pred = rf.predict(X_test)
+#print("Accuracy is ", accuracy_score(Y_test,rf_y_pred)*100)
+    
+def main():
+    X_train, Y_train, X_test, Y_test = get_data()
+    model = svm_train(X_train, Y_train)
+    svm_y_pred, confidence = svm_predict(model, X_test)
+    print("Accuracy is ", accuracy_score(Y_test,svm_y_pred)*100)
+    
+if __name__ == "__main__":
+    main()
+    
+    
+    
 
-svmC = svm.SVC(gamma='scale', probability=True)
 
-svmC.fit(X_train, Y_train) 
-svm_y_pred = svmC.predict(X_test)
-confidence = svmC.predict_log_proba(X_test)
-print("Accuracy is ", accuracy_score(Y_test,svm_y_pred)*100)
+ 
+
 
 
