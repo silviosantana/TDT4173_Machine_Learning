@@ -8,6 +8,7 @@ Created on Fri Apr 26 11:40:21 2019
 import numpy as np
 from PIL import Image
 import glob
+import cv2
 
 def onehot_encode(Y, n_classes=26):
     onehot = np.zeros((len(Y), n_classes))
@@ -25,7 +26,7 @@ def import_dataset():
     label = 0
     for letter in alphabet:
         for filename in glob.glob('dataset/chars74k-lite/' + letter + '/*.jpg'): #assuming gif
-            im=Image.open(filename)
+            im = cv2.imread(filename,0)
             image_list.append(im)
             label_list.append(label)
         
@@ -58,17 +59,26 @@ def train_val_split(X, Y, val_percentage):
     Y: [N, 1] numpy vector
     val_percentage: amount of data to put in validation set
   """
-  dataset_size = X.shape[0]
-  idx = np.arange(0, dataset_size)
-  np.random.shuffle(idx) 
-  
-  train_size = int(dataset_size*(1-val_percentage))
-  idx_train = idx[:train_size]
-  idx_val = idx[train_size:]
-  X_train, Y_train = X[idx_train], Y[idx_train]
-  X_val, Y_val = X[idx_val], Y[idx_val]
+  Y = np.reshape(Y,(len(Y),1))
+  X = np.append(X, Y, axis=1)
+  np.random.shuffle(X) 
+  X_train = []
+  Y_train = []
+  X_val = []
+  Y_val = []
+  for i in range(0, int(len(X)*val_percentage)):
+      X_train.append(X[i][:-1])
+      Y_train.append(X[i][-1:])
+
+  for i in range(len(X_train), len(X)):    
+      X_val.append(X[i][:-1])
+      Y_val.append(X[i][-1:])
+      
+  Y_train = np.reshape(Y_train,(len(Y_train),))
+  Y_val = np.reshape(Y_val,(len(Y_val),))
   return X_train, Y_train, X_val, Y_val
-    
+
+
 
 
     
