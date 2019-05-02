@@ -15,7 +15,7 @@ def import_detect_images():
  
     return image_list
 
-def whiteness_filter(image, width, height, ratio):
+def whiteness_filter(image, width, height, ratio): #filter out images that are mostly white (don't contain characters)
     threshold = ratio*255*width*height
     im_array = np.array(image)
     if (im_array.sum() > threshold):
@@ -66,7 +66,7 @@ def iou(coordinate1, coordinate2):
     
     return ans
 
-def non_max_supression(samples, coordinates, classes, scores, iou_threshold=0.3, max_boxes=10):
+def non_max_supression(samples, coordinates, classes, scores, iou_threshold=0.3, max_boxes=10): #prevent overlapping detections
     nms_indices = []
     # Use iou() to get the list of indices corresponding to boxes you keep    
     scores_indexes = np.array(scores).argsort().tolist()
