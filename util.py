@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 26 11:40:21 2019
-
-@author: silvi
-"""
 
 import numpy as np
-from PIL import Image
 import glob
 import cv2
 

@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Apr 29 03:35:59 2019
 
-@author: khale
-"""
 import numpy as np
 import util
 from matplotlib import pyplot as plt
@@ -11,17 +7,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from PIL import Image
 from skimage import feature as ft
-import cv2
 from sklearn import svm
 import skimage as sk
 #from skimage import transform
 #from skimage import util
 from scipy import ndarray
 import random
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
+
+
 def random_rotation(image_array: ndarray):
     # pick a random degree of rotation between 25% on the left and 25% on the right
     image_array = np.resize(image_array,(20,20))
@@ -122,25 +117,31 @@ def mlp_predict(mlp, X_test):
     mlp_y_pred = mlp.predict(X_test)
     confidence = mlp.predict_proba(X_test)  
     return mlp_y_pred, confidence
-#X_train, Y_train = augmentation(X_train, Y_train)
-#X_train = play(X_train)
-#X_test = play(X_test)
 
-#knn =  MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state=1)
-#knn.fit(X_train, Y_train) 
-#knn_y_pred = knn.predict(X_test)
-#print("Accuracy is ", accuracy_score(Y_test,knn_y_pred)*100)
-
-#rf = RandomForestClassifier(n_estimators=300,  random_state=0)
-#rf.fit(X_train, Y_train)
-#rf_y_pred = rf.predict(X_test)
-#print("Accuracy is ", accuracy_score(Y_test,rf_y_pred)*100)
     
 def main():
     X_train, Y_train, X_test, Y_test = get_data(False)
+    
+    #X_train, Y_train = augmentation(X_train, Y_train)
+    #X_train = play(X_train)
+    #X_test = play(X_test)
+    
+    print("Training SVM model...")
     model = svm_train(X_train, Y_train)
     svm_y_pred, confidence = svm_predict(model, X_test)
-    print("Accuracy is ", accuracy_score(Y_test,svm_y_pred)*100)
+    print("Accuracy for SVM is ", accuracy_score(Y_test,svm_y_pred)*100)
+    
+    print("Training MLP model...")
+    mlp =  MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state=1)
+    mlp.fit(X_train, Y_train) 
+    mlp_y_pred = mlp.predict(X_test)
+    print("Accuracy for MLP is ", accuracy_score(Y_test,mlp_y_pred)*100)
+    
+    print("Training Randon Forest model...")
+    rf = RandomForestClassifier(n_estimators=300,  random_state=0)
+    rf.fit(X_train, Y_train)
+    rf_y_pred = rf.predict(X_test)
+    print("Accuracy for Rand. Forest is ", accuracy_score(Y_test,rf_y_pred)*100)
     
 if __name__ == "__main__":
     main()

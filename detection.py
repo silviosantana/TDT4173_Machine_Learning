@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 30 09:24:27 2019
 
-@author: silvi
-"""
 import numpy as np
 from PIL import Image
 import glob
 import matplotlib.pyplot as plt 
 import classification
-import util
-import random
 
 def import_detect_images():
     image_list = []
@@ -24,12 +18,8 @@ def import_detect_images():
 def whiteness_filter(image, width, height, ratio):
     threshold = ratio*255*width*height
     im_array = np.array(image)
-    #im_array_mid = im_array[6:14][:]
-    #threshold2 = ratio*220*len(im_array_mid)*len(im_array_mid[1])
     if (im_array.sum() > threshold):
         return False #discard white image
-    #elif (im_array_mid.sum() > threshold2):
-    #    return False #discard white image
     else:
         return True #keep image
     
@@ -48,6 +38,7 @@ def threshold_filter(images, coordinates, classes, scores, threshold):
 
 def box_area(pmin,pmax):
     return (pmax[0] - pmin[0])*(pmax[1] - pmin[1])
+
 
 def iou(coordinate1, coordinate2):
     
@@ -104,6 +95,8 @@ def non_max_supression(samples, coordinates, classes, scores, iou_threshold=0.3,
             
     return f_images, f_coordinates, f_classes, f_scores
 
+
+
 def plot_boxes (image, coordinates, classes, scores):
     plt.figure()
     plt.imshow(image)
@@ -112,7 +105,7 @@ def plot_boxes (image, coordinates, classes, scores):
         
     for letter in range(97,123):
         class_names.append(chr(letter))
-    
+
     legend_map = {}
     for i in reversed(list(range(len(classes)))):
         c = classes[i]
@@ -149,15 +142,9 @@ def detect_single_image(im, model, stride, window_sizes):
                 #filter of white area
                 if (whiteness_filter(im_crop, w_size, w_size, 0.7)):
                     samples.append(im_crop)
-                    coordinates.append([j,i,w_size])
-        
-    
-    
-                    
+                    coordinates.append([j,i,w_size])      
     
     scores = []
-    
-    
     for i in range(0,len(samples)):
         samples[i] = samples[i].resize((20,20))
         
@@ -176,31 +163,26 @@ def detect_single_image(im, model, stride, window_sizes):
     #plotting boxes
     plot_boxes (im, coordinates, classes, scores)   
 
-#define hyperparameters stride, window_sizes[]
-stride = 2
-window_sizes = [20, 20] 
 
-#training the svm
-X, Y = classification.get_data(True)
-model = classification.svm_train(X, Y)
+def main():
+    #define hyperparameters stride, window_sizes[]
+    stride = 2
+    window_sizes = [20]
+    
+    #training the svm
+    X, Y = classification.get_data(True)
+    model = classification.svm_train(X, Y)
+    
+    #import the images
+    images = import_detect_images()
+    
+    #sliding window
+    for im in images:
+        detect_single_image(im, model, stride, window_sizes)
 
-#import the images
-images = import_detect_images()
-
-#sliding window
-for im in images:
-    detect_single_image(im, model, stride, window_sizes)
-
-#for i in range(0,len(samples)):
-#    #resample to 20x20
-#    sample = samples[i].resize((20,20))
-#    sample = [np.array(util.flatten_image_list([sample]))]
-#    classe, score = classification.svm_predict(model, sample)
-#    #classes.append(random.randint(0,25))
-#    #scores.append(random.random())
-
-
-
+if __name__ == "__main__":
+    main()
+    
     
     
     
