@@ -118,7 +118,38 @@ def mlp_predict(mlp, X_test):
     confidence = mlp.predict_proba(X_test)  
     return mlp_y_pred, confidence
 
+def rf_train(X_train, Y_train):
+    rf = RandomForestClassifier(n_estimators=300,  random_state=0)
+    rf.fit(X_train, Y_train)
+    return rf
+
+def rf_predict(rf, X_test):
+    rf_y_pred = rf.predict(X_test)
+    confidence = rf.predict_proba(X_test)  
+    return rf_y_pred, confidence
+
+def print_single_results(model, X_test, Y_test, alg):
+    X_test_5 = X_test[0:5]
+    Y_test_5 = Y_test[0:5]
     
+    if (alg == 'svm'):
+        pred, confidence = svm_predict(model, X_test_5)
+    elif(alg == 'mlp'):
+        pred, confidence = mlp_predict(model, X_test_5)
+    else:
+        pred, confidence = rf_predict(model, X_test_5)
+    
+    scores = []
+    pred = [int(i) for i in pred]
+    for i in range(0,len(confidence)):
+        scores.append(confidence[i][int(pred[i])])
+        
+    print("Individual Predictions for " + alg)
+    print("True Classes", Y_test_5)
+    print("Predicted Classes: ", pred)
+    print("Pred. confidence: ", scores)
+    
+
 def main():
     X_train, Y_train, X_test, Y_test = get_data(False)
     
@@ -132,16 +163,18 @@ def main():
     print("Accuracy for SVM is ", accuracy_score(Y_test,svm_y_pred)*100)
     
     print("Training MLP model...")
-    mlp =  MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state=1)
-    mlp.fit(X_train, Y_train) 
-    mlp_y_pred = mlp.predict(X_test)
+    mlp = mlp_train(X_train, Y_train)
+    mlp_y_pred, confidence = mlp_predict(mlp, X_test)
     print("Accuracy for MLP is ", accuracy_score(Y_test,mlp_y_pred)*100)
     
     print("Training Randon Forest model...")
-    rf = RandomForestClassifier(n_estimators=300,  random_state=0)
-    rf.fit(X_train, Y_train)
-    rf_y_pred = rf.predict(X_test)
+    rf = rf_train(X_train, Y_train)
+    rf_y_pred, confidence = rf_predict(rf, X_test)
     print("Accuracy for Rand. Forest is ", accuracy_score(Y_test,rf_y_pred)*100)
+    
+    print_single_results(model, X_test, Y_test, 'svm')
+    print_single_results(mlp, X_test, Y_test, 'mlp')
+    print_single_results(rf, X_test, Y_test, 'Randon Forest')
     
 if __name__ == "__main__":
     main()
